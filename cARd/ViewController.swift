@@ -11,7 +11,7 @@ import SceneKit
 import ARKit
 
 class ViewController: UIViewController {
-
+    
     @IBOutlet var sceneView: ARSCNView!
     
     var planes = [OverlayPlane]()
@@ -34,7 +34,7 @@ class ViewController: UIViewController {
         sceneView.delegate = self
         
         addCardNode()
-        let recognizer = UITapGestureRecognizer(target: self, action: #seelctor(tap))
+        let recognizer = UITapGestureRecognizer(target: self, action: #selector(tap))
         sceneView.addGestureRecognizer(recognizer)
     }
     
@@ -57,7 +57,7 @@ class ViewController: UIViewController {
     }
     
     fileprivate func addCardNode() {
-        let plane = SCNPlane(width: 0.1016, height: 0.0762)
+        let plane = SCNPlane(width: 0.12065, height: 0.085725)
         let material = SCNMaterial()
         material.isDoubleSided = true
         material.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
@@ -70,8 +70,31 @@ class ViewController: UIViewController {
         sceneView.scene.rootNode.addChildNode(cardNode)
     }
     
-    func tap(recognizer: UIGestureRecognizer) {
-        print("tap")
+    @objc func tap(recognizer: UIGestureRecognizer) {
+        let touchLocation = recognizer.location(in: sceneView)
+        let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
+        guard let result = results.first else {
+            return
+        }
+        addCard(with: result)
+    }
+    
+    func addCard(with result: ARHitTestResult) {
+        let plane = SCNPlane(width: 0.1016, height: 0.0762)
+        let material = SCNMaterial()
+        material.isDoubleSided = true
+        material.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
+        plane.materials = [material]
+        
+        let cardNode = SCNNode(geometry: plane)
+        cardNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: plane, options: nil))
+        cardNode.position = SCNVector3(result.worldTransform.columns.3.x,
+                                       result.worldTransform.columns.3.y,
+                                       result.worldTransform.columns.3.z)
+        cardNode.rotation = planes.first!.rotation
+        cardNode.eulerAngles = SCNVector3Make(-1.5708, 0, 0)
+        
+        sceneView.scene.rootNode.addChildNode(cardNode)
     }
 }
 
@@ -83,6 +106,7 @@ extension ViewController: ARSCNViewDelegate {
         }
         let plane = OverlayPlane(anchor: planeAnchor)
         planes.append(plane)
+        print("START")
         node.addChildNode(plane)
     }
     
