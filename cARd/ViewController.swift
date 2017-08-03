@@ -14,6 +14,8 @@ class ViewController: UIViewController {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    var planes = [OverlayPlane]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -70,6 +72,17 @@ extension ViewController: ARSCNViewDelegate {
             return
         }
         let plane = OverlayPlane(anchor: planeAnchor)
+        planes.append(plane)
         node.addChildNode(plane)
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        
+        let plane = self.planes.filter { $0.anchor.identifier == anchor.identifier }.first
+        
+        if plane == nil {
+            return
+        }
+        plane?.update(anchor: anchor as! ARPlaneAnchor)
     }
 }
