@@ -79,8 +79,10 @@ class ViewController: UIViewController {
     }
     
     func addCard(with result: ARHitTestResult) {
+        let cardWidth: Float = 0.1016
+        let cardHeight: Float = 0.0762
         //Front plane
-        let frontPlane = SCNPlane(width: 0.1016, height: 0.0762)
+        let frontPlane = SCNPlane(width: CGFloat(cardWidth), height: CGFloat(cardHeight))
         let frontMaterial = SCNMaterial()
         frontMaterial.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
         frontPlane.materials = [frontMaterial]
@@ -98,6 +100,7 @@ class ViewController: UIViewController {
                                         result.worldTransform.columns.3.y,
                                         result.worldTransform.columns.3.z)
         frontNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, 0)
+        frontNode.pivot = SCNMatrix4MakeTranslation(-cardWidth / 2, 0, 0)
         sceneView.scene.rootNode.addChildNode(frontNode)
         
         //Inside node
@@ -107,6 +110,7 @@ class ViewController: UIViewController {
                                          result.worldTransform.columns.3.y,
                                          result.worldTransform.columns.3.z)
         insideNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, Float(-Double.pi))
+        insideNode.pivot = SCNMatrix4MakeTranslation(cardWidth / 2, 0, 0)
         sceneView.scene.rootNode.addChildNode(insideNode)
         
         //Animation
