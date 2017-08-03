@@ -33,17 +33,9 @@ class ViewController: UIViewController {
         sceneView.scene = scene
         sceneView.delegate = self
         
-        let plane = SCNPlane(width: 0.1016, height: 0.0762)
-        let material = SCNMaterial()
-        material.isDoubleSided = true
-        material.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
-        plane.materials = [material]
-        
-        let cardNode = SCNNode(geometry: plane)
-        cardNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: plane, options: nil))
-        cardNode.position = SCNVector3(0, 0, -0.5)
-        
-        scene.rootNode.addChildNode(cardNode)
+        addCardNode()
+        let recognizer = UITapGestureRecognizer(target: self, action: #seelctor(tap))
+        sceneView.addGestureRecognizer(recognizer)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -62,6 +54,24 @@ class ViewController: UIViewController {
         
         // Pause the view's session
         sceneView.session.pause()
+    }
+    
+    fileprivate func addCardNode() {
+        let plane = SCNPlane(width: 0.1016, height: 0.0762)
+        let material = SCNMaterial()
+        material.isDoubleSided = true
+        material.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
+        plane.materials = [material]
+        
+        let cardNode = SCNNode(geometry: plane)
+        cardNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: plane, options: nil))
+        cardNode.position = SCNVector3(0, 0, -0.5)
+        
+        sceneView.scene.rootNode.addChildNode(cardNode)
+    }
+    
+    func tap(recognizer: UIGestureRecognizer) {
+        print("tap")
     }
 }
 
