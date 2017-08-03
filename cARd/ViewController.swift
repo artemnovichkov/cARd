@@ -33,7 +33,6 @@ class ViewController: UIViewController {
         sceneView.scene = scene
         sceneView.delegate = self
         
-        addCardNode()
         let recognizer = UITapGestureRecognizer(target: self, action: #selector(tap))
         sceneView.addGestureRecognizer(recognizer)
     }
@@ -80,21 +79,46 @@ class ViewController: UIViewController {
     }
     
     func addCard(with result: ARHitTestResult) {
-        let plane = SCNPlane(width: 0.1016, height: 0.0762)
-        let material = SCNMaterial()
-        material.isDoubleSided = true
-        material.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
-        plane.materials = [material]
+        //Front plane
+        let frontPlane = SCNPlane(width: 0.1016, height: 0.0762)
+        let frontMaterial = SCNMaterial()
+        frontMaterial.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
+        frontPlane.materials = [frontMaterial]
         
-        let cardNode = SCNNode(geometry: plane)
-        cardNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: plane, options: nil))
-        cardNode.position = SCNVector3(result.worldTransform.columns.3.x,
-                                       result.worldTransform.columns.3.y,
-                                       result.worldTransform.columns.3.z)
-        cardNode.rotation = planes.first!.rotation
-        cardNode.eulerAngles = SCNVector3Make(-1.5708, 0, 0)
+        //Inside plane
+        let insidePlane = SCNPlane(width: 0.1016, height: 0.0762)
+        let insideMaterial = SCNMaterial()
+        insideMaterial.diffuse.contents = UIImage(named: "201407150104_OB_A81_BACK")
+        insidePlane.materials = [insideMaterial]
         
-        sceneView.scene.rootNode.addChildNode(cardNode)
+        //Front node
+        let frontNode = SCNNode(geometry: frontPlane)
+        frontNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: frontPlane, options: nil))
+        frontNode.position = SCNVector3(result.worldTransform.columns.3.x,
+                                        result.worldTransform.columns.3.y,
+                                        result.worldTransform.columns.3.z)
+        frontNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, 0)
+        sceneView.scene.rootNode.addChildNode(frontNode)
+        
+        //Inside node
+        let insideNode = SCNNode(geometry: insidePlane)
+        insideNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: insidePlane, options: nil))
+        insideNode.position = SCNVector3(result.worldTransform.columns.3.x,
+                                         result.worldTransform.columns.3.y,
+                                         result.worldTransform.columns.3.z)
+        insideNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, Float(-Double.pi))
+        sceneView.scene.rootNode.addChildNode(insideNode)
+        
+        //Animation
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            let angleDelta: Float = 0.03
+            frontNode.eulerAngles = SCNVector3Make(frontNode.eulerAngles.x,
+                                                   frontNode.eulerAngles.y,
+                                                   frontNode.eulerAngles.z + angleDelta)
+            insideNode.eulerAngles = SCNVector3Make(insideNode.eulerAngles.x,
+                                                    insideNode.eulerAngles.y,
+                                                    insideNode.eulerAngles.z + angleDelta)
+        }
     }
 }
 
