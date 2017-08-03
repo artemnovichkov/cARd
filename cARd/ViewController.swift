@@ -84,17 +84,27 @@ class ViewController: UIViewController {
     }
     
     func addCard(withPosition position: SCNVector3, width: Float, height: Float) {
+        let insideImage = #imageLiteral(resourceName: "201407150141_OB_A81_INSIDE")
+        guard let inside = insideImage.split() else {
+            return
+        }
         //Front plane
         let frontPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
         let frontMaterial = SCNMaterial()
         frontMaterial.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
         frontPlane.materials = [frontMaterial]
         
-        //Inside plane
-        let insidePlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
-        let insideMaterial = SCNMaterial()
-        insideMaterial.diffuse.contents = UIImage(named: "201407150104_OB_A81_BACK")
-        insidePlane.materials = [insideMaterial]
+        //Inside left plane
+        let insideLeftPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
+        let insideLeftMaterial = SCNMaterial()
+        insideLeftMaterial.diffuse.contents = inside.left
+        insideLeftPlane.materials = [insideLeftMaterial]
+        
+        //Inside right plane
+        let insideRightPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
+        let insideRightMaterial = SCNMaterial()
+        insideRightMaterial.diffuse.contents = inside.right
+        insideRightPlane.materials = [insideRightMaterial]
         
         //Front node
         let frontNode = SCNNode(geometry: frontPlane)
@@ -104,13 +114,21 @@ class ViewController: UIViewController {
         frontNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
         sceneView.scene.rootNode.addChildNode(frontNode)
         
-        //Inside node
-        let insideNode = SCNNode(geometry: insidePlane)
-        insideNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: insidePlane, options: nil))
-        insideNode.position = position
-        insideNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, Float(-Double.pi))
-        insideNode.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
-        sceneView.scene.rootNode.addChildNode(insideNode)
+        //Inside left node
+        let insideLeftNode = SCNNode(geometry: insideLeftPlane)
+        insideLeftNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: insideLeftPlane, options: nil))
+        insideLeftNode.position = position
+        insideLeftNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, Float(-Double.pi))
+        insideLeftNode.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
+        sceneView.scene.rootNode.addChildNode(insideLeftNode)
+        
+        //Inside right node
+        let insideRightNode = SCNNode(geometry: insideRightPlane)
+        insideRightNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: insideRightPlane, options: nil))
+        insideRightNode.position = position
+        insideRightNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, 0)
+        insideRightNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
+        sceneView.scene.rootNode.addChildNode(insideRightNode)
         
         //Animation
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
@@ -118,10 +136,10 @@ class ViewController: UIViewController {
             frontNode.eulerAngles = SCNVector3Make(frontNode.eulerAngles.x,
                                                    frontNode.eulerAngles.y,
                                                    frontNode.eulerAngles.z + angleDelta)
-            insideNode.eulerAngles = SCNVector3Make(insideNode.eulerAngles.x,
-                                                    insideNode.eulerAngles.y,
-                                                    insideNode.eulerAngles.z + angleDelta)
-            if insideNode.eulerAngles.z > 0 {
+            insideLeftNode.eulerAngles = SCNVector3Make(insideLeftNode.eulerAngles.x,
+                                                    insideLeftNode.eulerAngles.y,
+                                                    insideLeftNode.eulerAngles.z + angleDelta)
+            if insideLeftNode.eulerAngles.z > 0 {
                 timer.invalidate()
             }
         }
@@ -135,6 +153,7 @@ extension ViewController: ARSCNViewDelegate {
             return
         }
         let plane = OverlayPlane(anchor: planeAnchor)
+        plane.isHidden = true
         planes.append(plane)
         print("START")
         node.addChildNode(plane)
