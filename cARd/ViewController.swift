@@ -24,10 +24,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.showsStatistics = true
         
         // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        let scene = SCNScene()
         
         // Set the scene to the view
         sceneView.scene = scene
+        
+        let plane = SCNPlane(width: 0.1016, height: 0.0762)
+        let material = SCNMaterial()
+        material.isDoubleSided = true
+        material.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
+        plane.materials = [material]
+        
+        let cardNode = SCNNode(geometry: plane)
+        cardNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: plane, options: nil))
+        cardNode.position = SCNVector3(0, 0, -0.5)
+        
+        scene.rootNode.addChildNode(cardNode)
     }
     
     override func viewWillAppear(_ animated: Bool) {
