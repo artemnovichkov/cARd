@@ -110,7 +110,7 @@ class ViewController: UIViewController {
         sceneView.scene.rootNode.addChildNode(insideNode)
         
         //Animation
-        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
             let angleDelta: Float = 0.03
             frontNode.eulerAngles = SCNVector3Make(frontNode.eulerAngles.x,
                                                    frontNode.eulerAngles.y,
@@ -118,6 +118,9 @@ class ViewController: UIViewController {
             insideNode.eulerAngles = SCNVector3Make(insideNode.eulerAngles.x,
                                                     insideNode.eulerAngles.y,
                                                     insideNode.eulerAngles.z + angleDelta)
+            if insideNode.eulerAngles.z > 0 {
+                timer.invalidate()
+            }
         }
     }
 }
