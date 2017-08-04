@@ -91,8 +91,14 @@ class ViewController: UIViewController {
         //Front plane
         let frontPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
         let frontMaterial = SCNMaterial()
-        frontMaterial.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
+        frontMaterial.diffuse.contents = #imageLiteral(resourceName: "201407150120_OB_A81_FRONT")
         frontPlane.materials = [frontMaterial]
+        
+        //back plane
+        let backPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
+        let backMaterial = SCNMaterial()
+        backMaterial.diffuse.contents = #imageLiteral(resourceName: "201407150104_OB_A81_BACK")
+        backPlane.materials = [backMaterial]
         
         //Inside left plane
         let insideLeftPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
@@ -129,6 +135,14 @@ class ViewController: UIViewController {
         insideRightNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, 0)
         insideRightNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
         sceneView.scene.rootNode.addChildNode(insideRightNode)
+        
+        //Front node
+        let backNode = SCNNode(geometry: backPlane)
+        backNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: backPlane, options: nil))
+        backNode.position = position
+        backNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, 0)
+        backNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
+        sceneView.scene.rootNode.addChildNode(backNode)
         
         //Animation
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
