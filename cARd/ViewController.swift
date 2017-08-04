@@ -88,72 +88,83 @@ class ViewController: UIViewController {
         guard let inside = insideImage.split() else {
             return
         }
-        //Front plane
-        let frontPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
+        //first front plane
+        let firstFrontPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
         let frontMaterial = SCNMaterial()
         frontMaterial.diffuse.contents = #imageLiteral(resourceName: "201407150120_OB_A81_FRONT")
-        frontPlane.materials = [frontMaterial]
+        firstFrontPlane.materials = [frontMaterial]
         
-        //back plane
-        let backPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
-        let backMaterial = SCNMaterial()
-        backMaterial.diffuse.contents = #imageLiteral(resourceName: "201407150104_OB_A81_BACK")
-        backPlane.materials = [backMaterial]
-        
-        //Inside left plane
-        let insideLeftPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
+        //first back plane
+        let firstBackPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
         let insideLeftMaterial = SCNMaterial()
         insideLeftMaterial.diffuse.contents = inside.left
-        insideLeftPlane.materials = [insideLeftMaterial]
+        firstBackPlane.materials = [insideLeftMaterial]
         
-        //Inside right plane
-        let insideRightPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
+        //second front plane
+        let secondFrontPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
         let insideRightMaterial = SCNMaterial()
         insideRightMaterial.diffuse.contents = inside.right
-        insideRightPlane.materials = [insideRightMaterial]
+        secondFrontPlane.materials = [insideRightMaterial]
+        
+        //second back plane
+        let secondBackPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
+        let backMaterial = SCNMaterial()
+        backMaterial.diffuse.contents = #imageLiteral(resourceName: "201407150104_OB_A81_BACK")
+        secondBackPlane.materials = [backMaterial]
         
         //Front node
-        let frontNode = SCNNode(geometry: frontPlane)
-        frontNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: frontPlane, options: nil))
-        frontNode.position = position
-        frontNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, 0)
-        frontNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
-        sceneView.scene.rootNode.addChildNode(frontNode)
+        let firstFrontNode = SCNNode(geometry: firstFrontPlane)
+        firstFrontNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: firstFrontPlane, options: nil))
+        firstFrontNode.position = position
+        firstFrontNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
+        firstFrontNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
+        sceneView.scene.rootNode.addChildNode(firstFrontNode)
         
-        //Inside left node
-        let insideLeftNode = SCNNode(geometry: insideLeftPlane)
-        insideLeftNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: insideLeftPlane, options: nil))
-        insideLeftNode.position = position
-        insideLeftNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, Float(-Double.pi))
-        insideLeftNode.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
-        sceneView.scene.rootNode.addChildNode(insideLeftNode)
+        //first back node
+        let firstBackNode = SCNNode(geometry: firstBackPlane)
+        firstBackNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: firstBackPlane, options: nil))
+        firstBackNode.position = position
+        firstBackNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
+        firstBackNode.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
+        sceneView.scene.rootNode.addChildNode(firstBackNode)
         
-        //Inside right node
-        let insideRightNode = SCNNode(geometry: insideRightPlane)
-        insideRightNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: insideRightPlane, options: nil))
-        insideRightNode.position = position
-        insideRightNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, 0)
-        insideRightNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
-        sceneView.scene.rootNode.addChildNode(insideRightNode)
+        //second front node
+        let secondFrontNode = SCNNode(geometry: secondFrontPlane)
+        secondFrontNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: secondFrontPlane, options: nil))
+        secondFrontNode.position = position
+        secondFrontNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
+        secondFrontNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
+        sceneView.scene.rootNode.addChildNode(secondFrontNode)
         
-        //Front node
-        let backNode = SCNNode(geometry: backPlane)
-        backNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: backPlane, options: nil))
-        backNode.position = position
-        backNode.eulerAngles = SCNVector3Make(Float(-Double.pi) / 2, 0, 0)
-        backNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
-        sceneView.scene.rootNode.addChildNode(backNode)
+        //second back node
+        let secondBackNode = SCNNode(geometry: secondBackPlane)
+        secondBackNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: secondBackPlane, options: nil))
+        secondBackNode.position = position
+        secondBackNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
+        secondBackNode.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
+        sceneView.scene.rootNode.addChildNode(secondBackNode)
         
         //Animation
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
             let angleDelta: Float = 0.03
-            frontNode.eulerAngles = SCNVector3Make(frontNode.eulerAngles.x,
-                                                   frontNode.eulerAngles.y,
-                                                   frontNode.eulerAngles.z + angleDelta)
-            insideLeftNode.eulerAngles = SCNVector3Make(insideLeftNode.eulerAngles.x,
-                                                    insideLeftNode.eulerAngles.y,
-                                                    insideLeftNode.eulerAngles.z + angleDelta)
-            if insideLeftNode.eulerAngles.z > 0 {
+            if firstBackNode.eulerAngles.z < 0 {
+                firstFrontNode.eulerAngles = SCNVector3Make(firstFrontNode.eulerAngles.x,
+                                                            firstFrontNode.eulerAngles.y,
+                                                            firstFrontNode.eulerAngles.z + angleDelta)
+                firstBackNode.eulerAngles = SCNVector3Make(firstBackNode.eulerAngles.x,
+                                                           firstBackNode.eulerAngles.y,
+                                                           firstBackNode.eulerAngles.z + angleDelta)
+            }
+            else {
+                secondFrontNode.eulerAngles = SCNVector3Make(secondFrontNode.eulerAngles.x,
+                                                             secondFrontNode.eulerAngles.y,
+                                                             secondFrontNode.eulerAngles.z + angleDelta)
+                secondBackNode.eulerAngles = SCNVector3Make(secondBackNode.eulerAngles.x,
+                                                            secondBackNode.eulerAngles.y,
+                                                            secondBackNode.eulerAngles.z + angleDelta)
+            }
+            
+            if secondFrontNode.eulerAngles.z > Float.pi {
                 timer.invalidate()
             }
         }
