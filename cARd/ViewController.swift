@@ -84,6 +84,79 @@ class ViewController: UIViewController {
     }
     
     func addCard(withPosition position: SCNVector3, width: Float, height: Float) {
+        let cardNode = Card(width: width, height: height)
+        cardNode.position = position
+        sceneView.scene.rootNode.addChildNode(cardNode)
+        
+        //Animation
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            let angleDelta: Float = 0.03
+            if cardNode.firstBackNode.eulerAngles.z < 0 {
+                cardNode.firstFrontNode.eulerAngles = SCNVector3Make(cardNode.firstFrontNode.eulerAngles.x,
+                                                            cardNode.firstFrontNode.eulerAngles.y,
+                                                            cardNode.firstFrontNode.eulerAngles.z + angleDelta)
+                cardNode.firstBackNode.eulerAngles = SCNVector3Make(cardNode.firstBackNode.eulerAngles.x,
+                                                           cardNode.firstBackNode.eulerAngles.y,
+                                                           cardNode.firstBackNode.eulerAngles.z + angleDelta)
+            }
+            else {
+                cardNode.secondFrontNode.eulerAngles = SCNVector3Make(cardNode.secondFrontNode.eulerAngles.x,
+                                                             cardNode.secondFrontNode.eulerAngles.y,
+                                                             cardNode.secondFrontNode.eulerAngles.z + angleDelta)
+                cardNode.secondBackNode.eulerAngles = SCNVector3Make(cardNode.secondBackNode.eulerAngles.x,
+                                                            cardNode.secondBackNode.eulerAngles.y,
+                                                            cardNode.secondBackNode.eulerAngles.z + angleDelta)
+            }
+            
+            if cardNode.secondFrontNode.eulerAngles.z > Float.pi {
+                timer.invalidate()
+            }
+        }
+    }
+}
+
+extension ViewController: ARSCNViewDelegate {
+    
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        guard let planeAnchor = anchor as? ARPlaneAnchor else {
+            return
+        }
+        let plane = OverlayPlane(anchor: planeAnchor)
+//        plane.isHidden = true
+        planes.append(plane)
+        print("START")
+        node.addChildNode(plane)
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        
+        let plane = self.planes.filter { $0.anchor.identifier == anchor.identifier }.first
+        
+        if plane == nil {
+            return
+        }
+        plane?.update(anchor: anchor as! ARPlaneAnchor)
+    }
+}
+
+final class Card: SCNNode {
+    
+    let width: Float
+    let height: Float
+    
+    var firstFrontNode: SCNNode!
+    var firstBackNode: SCNNode!
+    var secondFrontNode: SCNNode!
+    var secondBackNode: SCNNode!
+    
+    init(width: Float, height: Float) {
+        self.width = width
+        self.height = height
+        super.init()
+        initialize()
+    }
+    
+    func initialize() {
         let insideImage = #imageLiteral(resourceName: "201407150141_OB_A81_INSIDE")
         guard let inside = insideImage.split() else {
             return
@@ -113,84 +186,39 @@ class ViewController: UIViewController {
         secondBackPlane.materials = [backMaterial]
         
         //Front node
-        let firstFrontNode = SCNNode(geometry: firstFrontPlane)
-        firstFrontNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: firstFrontPlane, options: nil))
-        firstFrontNode.position = position
-        firstFrontNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
-        firstFrontNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
-        sceneView.scene.rootNode.addChildNode(firstFrontNode)
+        firstFrontNode = SCNNode(geometry: firstFrontPlane)
+        firstFrontNode?.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: firstFrontPlane, options: nil))
+        firstFrontNode?.position = position
+        firstFrontNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
+        firstFrontNode?.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
+        addChildNode(firstFrontNode!)
         
         //first back node
-        let firstBackNode = SCNNode(geometry: firstBackPlane)
-        firstBackNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: firstBackPlane, options: nil))
-        firstBackNode.position = position
-        firstBackNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
-        firstBackNode.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
-        sceneView.scene.rootNode.addChildNode(firstBackNode)
+        firstBackNode = SCNNode(geometry: firstBackPlane)
+        firstBackNode?.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: firstBackPlane, options: nil))
+        firstBackNode?.position = position
+        firstBackNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
+        firstBackNode?.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
+        addChildNode(firstBackNode!)
         
         //second front node
-        let secondFrontNode = SCNNode(geometry: secondFrontPlane)
-        secondFrontNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: secondFrontPlane, options: nil))
-        secondFrontNode.position = position
-        secondFrontNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
-        secondFrontNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
-        sceneView.scene.rootNode.addChildNode(secondFrontNode)
+        secondFrontNode = SCNNode(geometry: secondFrontPlane)
+        secondFrontNode?.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: secondFrontPlane, options: nil))
+        secondFrontNode?.position = position
+        secondFrontNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
+        secondFrontNode?.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
+        addChildNode(secondFrontNode!)
         
         //second back node
-        let secondBackNode = SCNNode(geometry: secondBackPlane)
-        secondBackNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: secondBackPlane, options: nil))
-        secondBackNode.position = position
-        secondBackNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
-        secondBackNode.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
-        sceneView.scene.rootNode.addChildNode(secondBackNode)
-        
-        //Animation
-        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            let angleDelta: Float = 0.03
-            if firstBackNode.eulerAngles.z < 0 {
-                firstFrontNode.eulerAngles = SCNVector3Make(firstFrontNode.eulerAngles.x,
-                                                            firstFrontNode.eulerAngles.y,
-                                                            firstFrontNode.eulerAngles.z + angleDelta)
-                firstBackNode.eulerAngles = SCNVector3Make(firstBackNode.eulerAngles.x,
-                                                           firstBackNode.eulerAngles.y,
-                                                           firstBackNode.eulerAngles.z + angleDelta)
-            }
-            else {
-                secondFrontNode.eulerAngles = SCNVector3Make(secondFrontNode.eulerAngles.x,
-                                                             secondFrontNode.eulerAngles.y,
-                                                             secondFrontNode.eulerAngles.z + angleDelta)
-                secondBackNode.eulerAngles = SCNVector3Make(secondBackNode.eulerAngles.x,
-                                                            secondBackNode.eulerAngles.y,
-                                                            secondBackNode.eulerAngles.z + angleDelta)
-            }
-            
-            if secondFrontNode.eulerAngles.z > Float.pi {
-                timer.invalidate()
-            }
-        }
-    }
-}
-
-extension ViewController: ARSCNViewDelegate {
-    
-    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-        guard let planeAnchor = anchor as? ARPlaneAnchor else {
-            return
-        }
-        let plane = OverlayPlane(anchor: planeAnchor)
-        plane.isHidden = true
-        planes.append(plane)
-        print("START")
-        node.addChildNode(plane)
+        secondBackNode = SCNNode(geometry: secondBackPlane)
+        secondBackNode?.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: secondBackPlane, options: nil))
+        secondBackNode?.position = position
+        secondBackNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
+        secondBackNode?.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
+        addChildNode(secondBackNode!)
     }
     
-    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        
-        let plane = self.planes.filter { $0.anchor.identifier == anchor.identifier }.first
-        
-        if plane == nil {
-            return
-        }
-        plane?.update(anchor: anchor as! ARPlaneAnchor)
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
