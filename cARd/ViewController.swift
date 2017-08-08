@@ -90,25 +90,8 @@ class ViewController: UIViewController {
         
         //Animation
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            let angleDelta: Float = 0.03
-            if cardNode.firstBackNode.eulerAngles.z < 0 {
-                cardNode.firstFrontNode.eulerAngles = SCNVector3Make(cardNode.firstFrontNode.eulerAngles.x,
-                                                            cardNode.firstFrontNode.eulerAngles.y,
-                                                            cardNode.firstFrontNode.eulerAngles.z + angleDelta)
-                cardNode.firstBackNode.eulerAngles = SCNVector3Make(cardNode.firstBackNode.eulerAngles.x,
-                                                           cardNode.firstBackNode.eulerAngles.y,
-                                                           cardNode.firstBackNode.eulerAngles.z + angleDelta)
-            }
-            else {
-                cardNode.secondFrontNode.eulerAngles = SCNVector3Make(cardNode.secondFrontNode.eulerAngles.x,
-                                                             cardNode.secondFrontNode.eulerAngles.y,
-                                                             cardNode.secondFrontNode.eulerAngles.z + angleDelta)
-                cardNode.secondBackNode.eulerAngles = SCNVector3Make(cardNode.secondBackNode.eulerAngles.x,
-                                                            cardNode.secondBackNode.eulerAngles.y,
-                                                            cardNode.secondBackNode.eulerAngles.z + angleDelta)
-            }
-            
-            if cardNode.secondFrontNode.eulerAngles.z > Float.pi {
+            cardNode.progress += 0.025
+            if cardNode.secondFrontNode!.eulerAngles.z > Float.pi {
                 timer.invalidate()
             }
         }
@@ -148,6 +131,28 @@ final class Card: SCNNode {
     var firstBackNode: SCNNode!
     var secondFrontNode: SCNNode!
     var secondBackNode: SCNNode!
+    
+    var progress = 0.0 {
+        didSet {
+            let angleDelta: Float = 0.03
+            if firstBackNode.eulerAngles.z < 0 {
+                firstFrontNode.eulerAngles = SCNVector3Make(firstFrontNode.eulerAngles.x,
+                                                                     firstFrontNode.eulerAngles.y,
+                                                                     firstFrontNode.eulerAngles.z + angleDelta)
+                firstBackNode.eulerAngles = SCNVector3Make(firstBackNode.eulerAngles.x,
+                                                                    firstBackNode.eulerAngles.y,
+                                                                    firstBackNode.eulerAngles.z + angleDelta)
+            }
+            else {
+                secondFrontNode.eulerAngles = SCNVector3Make(secondFrontNode.eulerAngles.x,
+                                                                      secondFrontNode.eulerAngles.y,
+                                                                      secondFrontNode.eulerAngles.z + angleDelta)
+                secondBackNode.eulerAngles = SCNVector3Make(secondBackNode.eulerAngles.x,
+                                                                     secondBackNode.eulerAngles.y,
+                                                                     secondBackNode.eulerAngles.z + angleDelta)
+            }
+        }
+    }
     
     init(width: Float, height: Float) {
         self.width = width
