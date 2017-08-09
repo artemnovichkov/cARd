@@ -157,45 +157,37 @@ final class Card: SCNNode {
             return
         }
         
-        func plan(image: UIImage, width: Float, height: Float) -> SCNPlane {
-            let plane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
-            let frontMaterial = SCNMaterial()
-            frontMaterial.diffuse.contents = image
-            plane.materials = [frontMaterial]
-            return plane
-        }
-        
         //Front node
-        let firstFrontPlane = plan(image: #imageLiteral(resourceName: "201407150120_OB_A81_FRONT"), width: width, height: height)
+        let firstFrontPlane = SCNPlane(image: #imageLiteral(resourceName: "201407150120_OB_A81_FRONT"), width: width, height: height)
         firstFrontNode = SCNNode(geometry: firstFrontPlane)
-        firstFrontNode?.physicsBody = firstFrontPlane.staticBody
-        firstFrontNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
-        firstFrontNode?.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
-        addChildNode(firstFrontNode!)
+        firstFrontNode.physicsBody = firstFrontPlane.staticBody
+        firstFrontNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
+        firstFrontNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
+        addChildNode(firstFrontNode)
         
         //first back node
-        let firstBackPlane = plan(image: inside.left, width: width, height: height)
+        let firstBackPlane = SCNPlane(image: inside.left, width: width, height: height)
         firstBackNode = SCNNode(geometry: firstBackPlane)
-        firstBackNode?.physicsBody = firstBackPlane.staticBody
-        firstBackNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
-        firstBackNode?.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
-        addChildNode(firstBackNode!)
+        firstBackNode.physicsBody = firstBackPlane.staticBody
+        firstBackNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
+        firstBackNode.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
+        addChildNode(firstBackNode)
         
         //second front node
-        let secondFrontPlane = plan(image: inside.right, width: width, height: height)
+        let secondFrontPlane = SCNPlane(image: inside.right, width: width, height: height)
         secondFrontNode = SCNNode(geometry: secondFrontPlane)
-        secondFrontNode?.physicsBody = secondFrontPlane.staticBody
-        secondFrontNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
-        secondFrontNode?.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
-        addChildNode(secondFrontNode!)
+        secondFrontNode.physicsBody = secondFrontPlane.staticBody
+        secondFrontNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
+        secondFrontNode.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
+        addChildNode(secondFrontNode)
         
         //second back node
-        let secondBackPlane = plan(image: #imageLiteral(resourceName: "201407150104_OB_A81_BACK"), width: width, height: height)
+        let secondBackPlane = SCNPlane(image: #imageLiteral(resourceName: "201407150104_OB_A81_BACK"), width: width, height: height)
         secondBackNode = SCNNode(geometry: secondBackPlane)
-        secondBackNode?.physicsBody = secondBackPlane.staticBody
-        secondBackNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
-        secondBackNode?.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
-        addChildNode(secondBackNode!)
+        secondBackNode.physicsBody = secondBackPlane.staticBody
+        secondBackNode.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
+        secondBackNode.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
+        addChildNode(secondBackNode)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -208,5 +200,12 @@ extension SCNPlane {
     var staticBody: SCNPhysicsBody {
         let shape = SCNPhysicsShape(geometry: self, options: nil)
         return SCNPhysicsBody(type: .static, shape: shape)
+    }
+    
+    convenience init(image: UIImage, width: Float, height: Float) {
+        self.init(width: CGFloat(width), height: CGFloat(height))
+        let frontMaterial = SCNMaterial()
+        frontMaterial.diffuse.contents = image
+        materials = [frontMaterial]
     }
 }
