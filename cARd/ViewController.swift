@@ -41,7 +41,7 @@ class ViewController: UIViewController {
         super.viewWillAppear(animated)
         
         // Create a session configuration
-        let configuration = ARWorldTrackingSessionConfiguration()
+        let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = .horizontal
         
         // Run the view's session
@@ -55,19 +55,7 @@ class ViewController: UIViewController {
         sceneView.session.pause()
     }
     
-    fileprivate func addCardNode() {
-        let plane = SCNPlane(width: 0.12065, height: 0.085725)
-        let material = SCNMaterial()
-        material.isDoubleSided = true
-        material.diffuse.contents = UIImage(named: "201407150120_OB_A81_FRONT")
-        plane.materials = [material]
-        
-        let cardNode = SCNNode(geometry: plane)
-        cardNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: plane, options: nil))
-        cardNode.position = SCNVector3(0, 0, -0.5)
-        
-        sceneView.scene.rootNode.addChildNode(cardNode)
-    }
+    // MARK: - Recognizers
     
     @objc func tap(recognizer: UIGestureRecognizer) {
         let touchLocation = recognizer.location(in: sceneView)
@@ -83,7 +71,9 @@ class ViewController: UIViewController {
         addCard(withPosition: position, width: 0.1016, height: 0.0762)
     }
     
-    func addCard(withPosition position: SCNVector3, width: Float, height: Float) {
+    // MARK: - Private
+    
+    private func addCard(withPosition position: SCNVector3, width: Float, height: Float) {
         let cardNode = Card(width: width, height: height)
         cardNode.position = position
         sceneView.scene.rootNode.addChildNode(cardNode)
@@ -166,58 +156,43 @@ final class Card: SCNNode {
         guard let inside = insideImage.split() else {
             return
         }
-        //first front plane
-        let firstFrontPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
-        let frontMaterial = SCNMaterial()
-        frontMaterial.diffuse.contents = #imageLiteral(resourceName: "201407150120_OB_A81_FRONT")
-        firstFrontPlane.materials = [frontMaterial]
         
-        //first back plane
-        let firstBackPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
-        let insideLeftMaterial = SCNMaterial()
-        insideLeftMaterial.diffuse.contents = inside.left
-        firstBackPlane.materials = [insideLeftMaterial]
-        
-        //second front plane
-        let secondFrontPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
-        let insideRightMaterial = SCNMaterial()
-        insideRightMaterial.diffuse.contents = inside.right
-        secondFrontPlane.materials = [insideRightMaterial]
-        
-        //second back plane
-        let secondBackPlane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
-        let backMaterial = SCNMaterial()
-        backMaterial.diffuse.contents = #imageLiteral(resourceName: "201407150104_OB_A81_BACK")
-        secondBackPlane.materials = [backMaterial]
+        func plan(image: UIImage, width: Float, height: Float) -> SCNPlane {
+            let plane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
+            let frontMaterial = SCNMaterial()
+            frontMaterial.diffuse.contents = image
+            plane.materials = [frontMaterial]
+            return plane
+        }
         
         //Front node
+        let firstFrontPlane = plan(image: #imageLiteral(resourceName: "201407150120_OB_A81_FRONT"), width: width, height: height)
         firstFrontNode = SCNNode(geometry: firstFrontPlane)
-        firstFrontNode?.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: firstFrontPlane, options: nil))
-        firstFrontNode?.position = position
+        firstFrontNode?.physicsBody = firstFrontPlane.staticBody
         firstFrontNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
         firstFrontNode?.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
         addChildNode(firstFrontNode!)
         
         //first back node
+        let firstBackPlane = plan(image: inside.left, width: width, height: height)
         firstBackNode = SCNNode(geometry: firstBackPlane)
-        firstBackNode?.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: firstBackPlane, options: nil))
-        firstBackNode?.position = position
+        firstBackNode?.physicsBody = firstBackPlane.staticBody
         firstBackNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
         firstBackNode?.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
         addChildNode(firstBackNode!)
         
         //second front node
+        let secondFrontPlane = plan(image: inside.right, width: width, height: height)
         secondFrontNode = SCNNode(geometry: secondFrontPlane)
-        secondFrontNode?.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: secondFrontPlane, options: nil))
-        secondFrontNode?.position = position
+        secondFrontNode?.physicsBody = secondFrontPlane.staticBody
         secondFrontNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, 0)
         secondFrontNode?.pivot = SCNMatrix4MakeTranslation(-width / 2, 0, 0)
         addChildNode(secondFrontNode!)
         
         //second back node
+        let secondBackPlane = plan(image: #imageLiteral(resourceName: "201407150104_OB_A81_BACK"), width: width, height: height)
         secondBackNode = SCNNode(geometry: secondBackPlane)
-        secondBackNode?.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: secondBackPlane, options: nil))
-        secondBackNode?.position = position
+        secondBackNode?.physicsBody = secondBackPlane.staticBody
         secondBackNode?.eulerAngles = SCNVector3Make(-Float.pi / 2, 0, -Float.pi)
         secondBackNode?.pivot = SCNMatrix4MakeTranslation(width / 2, 0, 0)
         addChildNode(secondBackNode!)
@@ -225,5 +200,13 @@ final class Card: SCNNode {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension SCNPlane {
+    
+    var staticBody: SCNPhysicsBody {
+        let shape = SCNPhysicsShape(geometry: self, options: nil)
+        return SCNPhysicsBody(type: .static, shape: shape)
     }
 }
